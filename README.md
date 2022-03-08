@@ -28,7 +28,7 @@ python convert.py --source [source_dataset] --to [to_dataset] --pics [pics_dir] 
 
 ### X2COCO
 
-- [ ] labelme
+- [x] labelme
 - [x] labelImg
 - [ ] easydata
 - [ ] jingling

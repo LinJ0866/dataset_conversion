@@ -58,6 +58,19 @@ class X2COCO(object):
         annotation["id"] = object_id + 1
         return annotation
 
+    def create_json_list(self, new_image_dir_detail, json_dir, train, val, test):
+        json_list_path = glob.glob("%s/*.json"%json_dir)
+        train_path, val_path = train_test_split(json_list_path, train_size=train)
+        val_path, test_path = train_test_split(val_path, train_size=val/(test+val))
+
+        json_list = [train_path, val_path, test_path]
+
+        for i in range(3):
+            for img_name in json_list[i]:
+                shutil.copy(
+                    img_name.replace("json", "jpg"),
+                    new_image_dir_detail[i])
+
     def convert(self, image_dir, json_dir, dataset_save_dir, train, val, test):
         """转换。
         Args:
@@ -65,7 +78,7 @@ class X2COCO(object):
             json_dir (str): 与每张图像对应的json文件的存放路径。
             dataset_save_dir (str): 转换后数据集存放路径。
         """
-        assert osp.exists(image_dir), "he image folder does not exist!"
+        assert osp.exists(image_dir), "The image folder does not exist!"
         assert osp.exists(json_dir), "The json folder does not exist!"
         if not osp.exists(dataset_save_dir):
             os.makedirs(dataset_save_dir)
@@ -84,17 +97,7 @@ class X2COCO(object):
             new_image_dir_detail.append(osp.join(new_image_dir, i))
             os.makedirs(osp.join(new_image_dir, i))
 
-        json_list_path = glob.glob("%s/*.xml"%json_dir)
-        train_path, val_path = train_test_split(json_list_path, train_size=train)
-        val_path, test_path = train_test_split(val_path, train_size=val/(test+val))
-
-        json_list = [train_path, val_path, test_path]
-
-        for i in range(3):
-            for img_name in json_list[i]:
-                shutil.copy(
-                    img_name.replace("xml", "jpg"),
-                    new_image_dir_detail[i])
+        self.create_json_list(new_image_dir_detail, json_dir, train, val, test)
 
         # Convert the json files.
         for i in range(3):
@@ -222,6 +225,19 @@ class LabelImg2COCO(X2COCO):
     def get_element(self, root, childElementName):
         element = root.find(childElementName)
         return element
+
+    def create_json_list(self, new_image_dir_detail, json_dir, train, val, test):
+        json_list_path = glob.glob("%s/*.xml"%json_dir)
+        train_path, val_path = train_test_split(json_list_path, train_size=train)
+        val_path, test_path = train_test_split(val_path, train_size=val/(test+val))
+
+        json_list = [train_path, val_path, test_path]
+
+        for i in range(3):
+            for img_name in json_list[i]:
+                shutil.copy(
+                    img_name.replace("xml", "jpg"),
+                    new_image_dir_detail[i])
 
     def generate_rectangle_anns_field(self, points, label, image_id, object_id,
                                       label_to_num):

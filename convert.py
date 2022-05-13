@@ -26,6 +26,7 @@ labelme2coco = LabelMe2COCO().convert
 easydata2coco = EasyData2COCO().convert
 jingling2coco = JingLing2COCO().convert
 labelimg2coco = LabelImg2COCO().convert
+planthopper = planthopper().convert
 
 
 def dataset_conversion(source, to, pics, anns, save_dir, train, val, test):
@@ -51,6 +52,8 @@ def dataset_conversion(source, to, pics, anns, save_dir, train, val, test):
         easydata2coco(pics, anns, save_dir, train, val, test)
     elif source.lower() == 'jingling' and to.lower() == 'coco':
         jingling2coco(pics, anns, save_dir, train, val, test)
+    elif source.lower() == 'planthopper' and to.lower() == 'coco':
+        planthopper(pics, save_dir, train, val, test)
     else:
         raise Exception("Converting from {} to {} is not supported.".format(
             source, to))
@@ -108,7 +111,6 @@ def main():
     assert args.source is not None, "--source should be defined while converting dataset"
     assert args.to is not None, "--to should be defined to confirm the taregt dataset format"
     assert args.pics is not None, "--pics should be defined to confirm the pictures path"
-    assert args.annotations is not None, "--annotations should be defined to confirm the annotations path"
     assert args.save_dir is not None, "--save_dir should be defined to store taregt dataset"
     # assert args.train+args.val+args.test != 1.0, "train + val + test should be 1"
 

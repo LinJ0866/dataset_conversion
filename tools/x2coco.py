@@ -217,12 +217,12 @@ class planthopper(X2COCO):
         
         # Convert the image files.
         new_image_dir = osp.join(dataset_save_dir, "images")
-        # if osp.exists(new_image_dir):
-        #     raise Exception(
-        #         "The directory {} is already exist, please remove the directory first".
-        #         format(new_image_dir))
-        # os.makedirs(new_image_dir)
-        # os.makedirs(osp.join(dataset_save_dir, "annotations"))
+        if osp.exists(new_image_dir):
+            raise Exception(
+                "The directory {} is already exist, please remove the directory first".
+                format(new_image_dir))
+        os.makedirs(new_image_dir)
+        os.makedirs(osp.join(dataset_save_dir, "annotations"))
         
 
         coco_category = ['train2017', 'val2017', 'test2017']
@@ -233,7 +233,7 @@ class planthopper(X2COCO):
             if not osp.exists(new_path):
                 os.makedirs(new_path)
 
-        # self.create_json_list(new_image_dir_detail, 'origin', train, val, test)
+        self.create_json_list(new_image_dir_detail, 'origin', train, val, test)
 
         # Convert the json files.
         for i in range(3):

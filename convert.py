@@ -27,6 +27,7 @@ easydata2coco = EasyData2COCO().convert
 jingling2coco = JingLing2COCO().convert
 labelimg2coco = LabelImg2COCO().convert
 planthopper = planthopper().convert
+planthopper2yolo = planthopper2yolo().convert
 
 
 def dataset_conversion(source, to, pics, anns, save_dir, train, val, test):
@@ -54,6 +55,8 @@ def dataset_conversion(source, to, pics, anns, save_dir, train, val, test):
         jingling2coco(pics, anns, save_dir, train, val, test)
     elif source.lower() == 'planthopper' and to.lower() == 'coco':
         planthopper(pics, save_dir, train, val, test)
+    elif source.lower() == 'planthopper' and to.lower() == 'yolo':
+        planthopper2yolo(pics, save_dir, train, val, test)
     else:
         raise Exception("Converting from {} to {} is not supported.".format(
             source, to))

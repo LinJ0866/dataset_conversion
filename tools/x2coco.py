@@ -68,7 +68,7 @@ class X2COCO(object):
         for i in range(3):
             for img_name in json_list[i]:
                 shutil.copy(
-                    img_name.replace("json", "jpg"),
+                    img_name.replace("json", "png"),
                     new_image_dir_detail[i])
 
     def convert(self, image_dir, json_dir, dataset_save_dir, train, val, test):

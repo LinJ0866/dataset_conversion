@@ -118,9 +118,171 @@ class X2COCO(object):
             for i in self.categories_list:
                 f.writelines(i['name'])
 
-class planthopper(X2COCO):
+#planthopper_135
+class Planthopper135_2coco(X2COCO):
     def __init__(self):
-        super(planthopper, self).__init__()
+        super(Planthopper135_2coco, self).__init__()
+
+    def create_json_list(self, new_image_dir_detail, json_dir, train, val, test):
+        json_list_path = glob.glob("%s/*.json"%json_dir)
+        # print(json_list_path)
+        train_path, val_path = train_test_split(json_list_path, train_size=train)
+        val_path, test_path = train_test_split(val_path, train_size=val/(test+val))
+
+        json_list = [train_path, val_path, test_path]
+
+        for i in range(3):
+            for img_name in json_list[i]:
+                if os.path.exists(img_name.replace("json", "jpeg")):
+                    shutil.copy(
+                        img_name.replace("json", "jpeg"),
+                        new_image_dir_detail[i])
+                elif os.path.exists(img_name.replace("json", "jpg")):
+                    shutil.copy(
+                        img_name.replace("json", "jpg"),
+                        new_image_dir_detail[i])
+                elif os.path.exists(img_name.replace("json", "png")):
+                    shutil.copy(
+                        img_name.replace("json", "png"),
+                        new_image_dir_detail[i])
+                elif os.path.exists(img_name.replace("json", "bmp")):
+                    shutil.copy(
+                        img_name.replace("json", "bmp"),
+                        new_image_dir_detail[i])
+                else:
+                    print('!!!please copy the [{}] to {}'.format(img_name, new_image_dir_detail[i]))
+    
+    def generate_rectangle_anns_field(self, points, label, image_id, object_id,
+                                      label_to_num):
+        annotation = {}
+        annotation["iscrowd"] = 0
+        annotation["image_id"] = image_id + 1
+        annotation["bbox"] = list(
+            map(float, [
+                points[0][0], points[0][1], points[1][0] - points[0][0],
+                points[1][1] - points[0][1]
+            ]))
+        annotation["area"] = annotation["bbox"][2] * annotation["bbox"][3]
+        annotation["category_id"] = label_to_num[label]
+        annotation["id"] = object_id + 1
+        return annotation
+
+    
+    def generate_images_field(self, image_file, image_id):
+        image = {}
+        image["id"] = image_id + 1
+        image["file_name"] = image_file
+        return image
+
+
+    def parse_json(self, img_dir, json_dir):
+        image_id = -1
+        object_id = -1
+        labels_list = []
+        label_to_num = {}
+        for img_file in os.listdir(img_dir):
+            print(img_file)
+            img_name_part = osp.splitext(img_file)[0]
+            json_file = osp.join(json_dir, img_name_part + ".json")
+            if not osp.exists(json_file):
+                print("!!!can't find the json file: "+json_file)
+                # os.remove(osp.join(img_dir, img_file))
+                continue
+            image_id = image_id + 1
+            with open(json_file, mode='r', \
+                      encoding=get_encoding(json_file)) as j:
+                
+                # 图片基本信息
+                image = cv2.imread(osp.join(img_dir, img_file))
+                size = image.shape
+
+                img_info = {
+                    "id": image_id,
+                    "file_name": img_file,
+                    "height": size[0],
+                    "width": size[1]
+                }
+
+                self.images_list.append(img_info)
+
+                json_info = json.load(j)
+                json_info = json_info['labels']
+                
+                for labelInfo in json_info:
+                    object_id = object_id + 1
+                    label = labelInfo['name']
+                    if label not in labels_list:
+                        self.categories_list.append( \
+                            self.generate_categories_field(label, labels_list))
+                        labels_list.append(label)
+                        label_to_num[label] = len(labels_list)
+                    
+                    points = []
+                    points.append([labelInfo['x1'], labelInfo['y1']])
+                    points.append([labelInfo['x2'], labelInfo['y2']])
+                    self.annotations_list.append(
+                        self.generate_rectangle_anns_field(
+                            points, label, image_id, object_id,
+                            label_to_num))
+
+    def convert(self, dataset_dir, dataset_save_dir, train, val, test):
+        assert osp.exists(dataset_dir), "The json folder does not exist!"
+        # if not osp.exists('origin'):
+        #     os.makedirs('origin/')
+        if not osp.exists(dataset_save_dir):
+            os.makedirs(dataset_save_dir)
+
+            # for dir in os.listdir(dataset_dir):
+            #     dir_name = os.path.join(dataset_dir, dir)
+            #     for file in os.listdir(dir_name):
+            #         if file.split('.')[1] == 'txt':
+            #             shutil.copy(os.path.join(dir_name, file), os.path.join('origin/', file))
+            #         else:
+            #             shutil.copy(os.path.join(dir_name, file), os.path.join('origin/', file.split('.')[0]+'.jpg'))
+        
+        # Convert the image files.
+        # new_image_dir = osp.join(dataset_save_dir, "images")
+        # if osp.exists(new_image_dir):
+        #     raise Exception(
+        #         "The directory {} is already exist, please remove the directory first".
+        #         format(new_image_dir))
+        # os.makedirs(new_image_dir)
+        os.makedirs(osp.join(dataset_save_dir, "annotations"))
+        
+
+        coco_category = ['train2017', 'val2017', 'test2017']
+        new_image_dir_detail = []
+        for i in coco_category:
+            new_image_dir_detail.append(osp.join(dataset_save_dir, i))
+            new_path = osp.join(dataset_save_dir, i)
+            if not osp.exists(new_path):
+                os.makedirs(new_path)
+
+        self.create_json_list(new_image_dir_detail, dataset_dir, train, val, test)
+
+        # Convert the json files.
+        for i in range(3):
+            self.images_list = []
+            self.categories_list = []
+            self.annotations_list = []
+            self.parse_json(new_image_dir_detail[i], dataset_dir)
+            coco_data = {}
+            coco_data["images"] = self.images_list
+            coco_data["categories"] = self.categories_list
+            coco_data["annotations"] = self.annotations_list
+            json_path = osp.join(dataset_save_dir, 'annotations', "instances_%s.json"%coco_category[i])
+            f = open(json_path, "w")
+            json.dump(coco_data, f, indent=4, cls=MyEncoder)
+            f.close()
+        # labels.txt
+        with open(dataset_save_dir + '/labels.txt', 'w') as f:
+            for i in self.categories_list:
+                f.writelines(i['name']+'\n')
+
+# planthopper2417
+class Planthopper2417_2coco(X2COCO):
+    def __init__(self):
+        super(Planthopper2417_2coco, self).__init__()
 
     def create_json_list(self, new_image_dir_detail, json_dir, train, val, test):
         json_list_path = glob.glob("%s/*.txt"%json_dir)

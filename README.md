@@ -14,12 +14,16 @@ pip install -r requirement.txt
 
 ```bash
 python convert.py --source [source_dataset] --to [to_dataset] --pics [pics_dir] --annotations [annotations_dir] --save_dir [output_dir]
-
-# 例： python convert.py --source labelimg --to coco --pics shootDataset --annotations shootDataset --save_dir coco
+# 可选--train 0.7 --val 0.2 --test 0.1
 ```
 
-> 可选参数
+> 参数列表
 > 
+> - source  转化前数据集类型 **必填**
+> - to   转化后数据集类型 **必填**
+> - pics 转化前数据集图片存储位置 **必填**
+> - annotations 转化前数据集标签存储位置（个别任务无需提供）
+> - save_dir 转化后数据集保存位置 **必填**
 > - train 训练集划分比例（默认0.7）
 > - val  测试集划分比例（默认0.2）
 > - test（默认0.1）
@@ -30,8 +34,15 @@ python convert.py --source [source_dataset] --to [to_dataset] --pics [pics_dir] 
 
 - [x] labelme
 - [x] labelImg
+- [x] planthopper_135
+- [x] planthopper_2417
 - [ ] easydata
 - [ ] jingling
+
+### X2yolo
+
+- [x] planthopper_135
+- [x] planthopper_2417
 
 ### X2Seg
 

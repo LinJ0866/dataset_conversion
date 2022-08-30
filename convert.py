@@ -26,8 +26,10 @@ labelme2coco = LabelMe2COCO().convert
 easydata2coco = EasyData2COCO().convert
 jingling2coco = JingLing2COCO().convert
 labelimg2coco = LabelImg2COCO().convert
-planthopper = planthopper().convert
-planthopper2yolo = planthopper2yolo().convert
+planthopper2417_2coco = Planthopper2417_2coco().convert
+planthopper135_2coco = Planthopper135_2coco().convert
+planthopper2417_2yolo = Planthopper2417_2yolo().convert
+planthopper135_2yolo = Planthopper135_2yolo().convert
 
 
 def dataset_conversion(source, to, pics, anns, save_dir, train, val, test):
@@ -53,10 +55,14 @@ def dataset_conversion(source, to, pics, anns, save_dir, train, val, test):
         easydata2coco(pics, anns, save_dir, train, val, test)
     elif source.lower() == 'jingling' and to.lower() == 'coco':
         jingling2coco(pics, anns, save_dir, train, val, test)
-    elif source.lower() == 'planthopper' and to.lower() == 'coco':
-        planthopper(pics, save_dir, train, val, test)
-    elif source.lower() == 'planthopper' and to.lower() == 'yolo':
-        planthopper2yolo(pics, save_dir, train, val, test)
+    elif source.lower() == 'planthopper_135' and to.lower() == 'coco':
+        planthopper135_2coco(pics, save_dir, train, val, test)
+    elif source.lower() == 'planthopper_135' and to.lower() == 'yolo':
+        planthopper135_2yolo(pics, save_dir, train, val, test)
+    elif source.lower() == 'planthopper_2417' and to.lower() == 'coco':
+        planthopper2417_2coco(pics, save_dir, train, val, test)
+    elif source.lower() == 'planthopper_2417' and to.lower() == 'yolo':
+        planthopper2417_2yolo(pics, save_dir, train, val, test)
     else:
         raise Exception("Converting from {} to {} is not supported.".format(
             source, to))
